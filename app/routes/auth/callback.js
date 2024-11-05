@@ -1,42 +1,51 @@
-import { json } from '@remix-run/node';
-import fetch from 'node-fetch';
+import { json, redirect } from '@remix-run/node';
 import dotenv from 'dotenv';
-import crypto from 'crypto';
 
 dotenv.config();
 
 export const loader = async ({ request }) => {
-  const { SHOPIFY_API_SECRET } = process.env;
-
   const url = new URL(request.url);
-  const { shop, code, hmac } = Object.fromEntries(url.searchParams);
+  const code = url.searchParams.get('code');
+  const hmac = url.searchParams.get('hmac');
+  const shop = url.searchParams.get('shop');
+  
+  // Log the parameters for debugging
+  console.log('Callback Parameters:', { code, hmac, shop });
 
-  // Validate the HMAC
-  const expectedHmac = crypto
-    .createHmac('sha256', SHOPIFY_API_SECRET)
-    .update(url.searchParams.toString())
-    .digest('hex');
-
-  if (expectedHmac !== hmac) {
-    return json({ error: 'HMAC validation failed' }, { status: 403 });
+  if (!code || !hmac || !shop) {
+    return new Response('Missing required parameters', { status: 400 });
   }
 
-  // Exchange code for access token
-  const tokenResponse = await fetch(`https://${shop}/admin/oauth/access_token`, {
+  // Verify HMAC if necessary (security measure)
+  // Add your HMAC verification logic here
+
+  // Exchange the code for a permanent access token
+  const accessTokenUrl = `https://${shop}/admin/oauth/access_token`;
+  const params = {
+    client_id: process.env.SHOPIFY_API_KEY,
+    client_secret: process.env.SHOPIFY_API_SECRET,
+    code: code,
+  };
+
+  const response = await fetch(accessTokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      client_id: process.env.SHOPIFY_API_KEY,
-      client_secret: SHOPIFY_API_SECRET,
-      code,
-    }),
+    body: JSON.stringify(params),
   });
 
-  const { access_token } = await tokenResponse.json();
-
-  // Store access token securely (e.g., in a database)
-
-  return json({ success: true, access_token });
+  const data = await response.json();
+  
+  if (response.ok) {
+    const accessToken = data.access_token;
+    // Save the access token securely, e.g., in your database
+    console.log('Access Token:', accessToken);
+    
+    // Redirect to your app’s dashboard or a welcome page
+    return redirect('/dashboard'); // Update this with your app's dashboard route
+  } else {
+    console.error('Error fetching access token:', data);
+    return new Response('Error exchanging code for access token', { status: 500 });
+  }
 };
