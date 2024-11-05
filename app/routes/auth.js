@@ -15,5 +15,5 @@ export const loader = async ({ request }) => {
 
   const authUrl = `https://${shop}/admin/oauth/authorize?client_id=${SHOPIFY_API_KEY}&scope=${SHOPIFY_SCOPES}&redirect_uri=${SHOPIFY_APP_URL}/auth/callback`;
 
-  return json({ redirect: authUrl });
+  return redirect(authUrl);
 };
