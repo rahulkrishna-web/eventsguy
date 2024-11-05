@@ -1,4 +1,4 @@
-import { json } from 'remix';
+import { json } from '@remix-run/node';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
