@@ -1,9 +1,19 @@
 // app/routes/index.jsx
-import { Card, EmptyState } from '@shopify/polaris';
+import { Page, Card, EmptyState } from '@shopify/polaris';
+import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 
 export default function Index() {
+  const generateProduct = () => {
+    console.log("generate product");
+  }
   return (
-    <Card>
+    <Page>
+      <TitleBar title="Remix app template">
+        <button variant="primary" onClick={generateProduct}>
+          Events Dashboard
+        </button>
+      </TitleBar>
+      <Card>
       <EmptyState
         heading="No Events Yet"
         action={{
@@ -17,5 +27,6 @@ export default function Index() {
         <p>You have not created any events yet. Start by creating your first event.</p>
       </EmptyState>
     </Card>
+    </Page>
   );
 }
