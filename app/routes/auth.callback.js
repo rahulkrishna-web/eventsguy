@@ -43,7 +43,7 @@ export const loader = async ({ request }) => {
     console.log('Access Token:', accessToken);
     
     // Redirect to your app’s dashboard or a welcome page
-    return redirect('/dashboard'); // Update this with your app's dashboard route
+    return redirect('/'); // Update this with your app's dashboard route
   } else {
     console.error('Error fetching access token:', data);
     return new Response('Error exchanging code for access token', { status: 500 });
